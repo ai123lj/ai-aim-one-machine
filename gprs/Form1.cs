@@ -45,7 +45,7 @@ namespace gprs
         public static extern void keybd_event(byte bVk, byte bScan, int dwFlags, int dwExtraInfo);
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////游戏操作相关变
-        System.Drawing.Point mousePositionJiaDian = new System.Drawing.Point(Screen.PrimaryScreen.Bounds.Width/2, Screen.PrimaryScreen.Bounds.Height/2);
+        System.Drawing.Point mousePositionJiaDian = new System.Drawing.Point(Screen.PrimaryScreen.Bounds.Width / 2, Screen.PrimaryScreen.Bounds.Height / 2);
         bool jiaDianMode = false;
 
         int fireZhu = 2;
@@ -61,14 +61,14 @@ namespace gprs
 
         SerialPort serialPort1 = new SerialPort();
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////yolo
-        YoloPredictor predictor = new YoloPredictor("./yolo11s-pose.onnx");
+        YoloPredictor predictor = new YoloPredictor("./yolo11m-pose.onnx");
 
         /// <summary>
-        static int width = 640,height=640;
+        static int width = 640, height = 640;
         Bitmap bitmap = new Bitmap(width, height, PixelFormat.Format24bppRgb);
         Graphics graphics;
         Pen pen = new Pen(System.Drawing.Color.Black); // 点的大小设置为1像素
-        System.Drawing.Point pointMirror = new System.Drawing.Point(width/2+1, height/2+1);
+        System.Drawing.Point pointMirror = new System.Drawing.Point(width / 2 + 1, height / 2 + 1);
         /// </summary>
         public Form1()
         {
@@ -107,8 +107,8 @@ namespace gprs
                         }
                         else if (radioButton2.Checked)
                         {
-                            xSensitivity = 215;//2554p 156;//1080p 215
-                            ySensitivity = 207;//2554p 146;//1080p 207
+                            xSensitivity = 160;//2554p 160;//1080p 215
+                            ySensitivity = 158;//2554p 158;//1080p 207
                         }
                         else if (radioButton3.Checked)
                         {
@@ -179,7 +179,7 @@ namespace gprs
                     count = 0;
                 }
             });
-            
+
             Task.Run(() =>
             {
                 while (true)
@@ -231,7 +231,7 @@ namespace gprs
                     }
                 }
             });
-            
+
         }
         public void moveMouse()
         {
@@ -284,13 +284,13 @@ namespace gprs
         }
 
         public void Yolo(int xSensitivity, int ySensitivity, int fireMode, int delayRun, int location)
-        {            
+        {
             // 获取准心坐标
             System.Drawing.Point mousePosition = new System.Drawing.Point(mousePositionJiaDian.X, mousePositionJiaDian.Y);
-            System.Drawing.Rectangle region2 = new System.Drawing.Rectangle(mousePosition.X - width/2, mousePosition.Y - height/2, width, height);
-                                     
+            System.Drawing.Rectangle region2 = new System.Drawing.Rectangle(mousePosition.X - width / 2, mousePosition.Y - height / 2, width, height);
+
             graphics.CopyFromScreen(region2.X, region2.Y, 0, 0, region2.Size);
-                       
+
             System.Drawing.Color ColorMirror = bitmap.GetPixel(pointMirror.X, pointMirror.Y);
             graphics.DrawLine(pen, pointMirror.X, pointMirror.Y, pointMirror.X, pointMirror.Y - 1);
 
@@ -299,7 +299,7 @@ namespace gprs
             {
                 graphics.FillRectangle(brush, new System.Drawing.Rectangle(width / 2 + 100, height / 2 + 100, 250, 250));
             }
-            
+
             if (serialPort1.IsOpen == false)
             {
                 return;
@@ -363,14 +363,14 @@ namespace gprs
                 if (!jiaDianMode)
                     return;
             }
-            
+
             //开始识别
             MemoryStream memoryStream = new MemoryStream();
             bitmap.Save(memoryStream, ImageFormat.Bmp); // 可以改变ImageFormat来保存为其他格式，如Jpeg, Bmp等
             memoryStream.Position = 0; // 重设流的位置，以确保从头开始读取
             SixLabors.ImageSharp.Image img = SixLabors.ImageSharp.Image.Load(memoryStream);
             YoloResult<Pose> result = predictor.Pose(img);
-            
+
             //把识别结果画到图像上，并寻找离准心最近的敌人
             int id = -1, min = 1000, id2 = 0;
             for (int i = 0; i < result.Count; i++)// foreach (var item in result)
@@ -390,21 +390,21 @@ namespace gprs
                     id = i;
                 }
             }
-            
+
             //显示图像
             Action action = () =>
             {
                 ///textBox1.Text = result.Boxes[id].Bounds.X + "";//  result.ToString();
                 //textBox1.Text = ColorMirror.ToString();
-                if(id >= 0)
-                    textBox1.Text = result[id].Confidence+ "";
+                if (id >= 0)
+                    textBox1.Text = result[id].Confidence + "";
 
                 if (pictureBox1.Image != null)
                 {
                     pictureBox1.Image.Dispose();
                     pictureBox1.Image = null;
                 }
-               pictureBox1.Image = (Bitmap)bitmap.Clone();
+                pictureBox1.Image = (Bitmap)bitmap.Clone();
             };
             Invoke(action);
 
@@ -413,20 +413,23 @@ namespace gprs
 
             //根据识别坐标，进行瞄准杀敌操作                   
 
-            int x=0;
-            int y=0;
+            int x = 0;
+            int y = 0;
 
             switch (location)
             {
-                case 0: x = result[id][1].Point.X - width / 2;
-                        y = (result[id].Bounds.Y + result[id][1].Point.Y) / 2 - height / 2;
-                        break;
-                case 1: x = (result[id][5].Point.X+ result[id][6].Point.X)/2 - width / 2;
-                        y = (result[id][6].Point.Y*2+ result[id][11].Point.Y) / 3 - height / 2; 
-                        break;
-                case 2: x = result[id][1].Point.X - width / 2;
-                        y = result[id][1].Point.Y - height / 2; 
-                        break;
+                case 0:
+                    x = result[id][1].Point.X - width / 2;
+                    y = (result[id].Bounds.Y + result[id][1].Point.Y) / 2 - height / 2;
+                    break;
+                case 1:
+                    x = (result[id][5].Point.X + result[id][6].Point.X) / 2 - width / 2;
+                    y = (result[id][6].Point.Y * 2 + result[id][11].Point.Y) / 3 - height / 2;
+                    break;
+                case 2:
+                    x = result[id][1].Point.X - width / 2;
+                    y = result[id][1].Point.Y - height / 2;
+                    break;
             }
 
             int x1 = (int)(x * xSensitivity / 100.0f);
@@ -476,8 +479,8 @@ namespace gprs
                 {
                     stopwatchJianGe.Restart();
                 }
-            }   
-            
+            }
+
         }
 
         public void Delay(int delayMilliseconds)
@@ -584,6 +587,22 @@ namespace gprs
         private void radioButton9_CheckedChanged(object sender, EventArgs e)
         {
 
+        }
+        Stopwatch stopwatchTest = new Stopwatch();
+        private void button1_Click(object sender, EventArgs e)
+        {
+            //stopwatchTest.Restart();
+            //serialPort1.Write("{1,0,20}");            
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            //stopwatchTest.Stop();            
+            Action action = () =>
+            {
+                    //textBox1.Text = stopwatchTest.ElapsedMilliseconds + "";
+            };
+            //Invoke(action);
         }
     }
 

@@ -25,17 +25,25 @@ void loop() {
     //验证头
     if (Serial.read() != '{')
       return;
-    delay(1);
-    //头正确，开始接收
-    
+ 
     int len;
-    for (len = 0; Serial.available() > 0; len++) {
+    for (len = 0; Serial.peek() != '}'; len++) {
       buf[len] = Serial.read();
     }
-    //验证尾
-    if (buf[len - 1] != '}')
-      return;
-    buf[len - 1] = 0;
+    buf[len] = 0;
+
+    //Serial.println(buf);
+    // delay(1);
+    // //头正确，开始接收
+    
+    // int len;
+    // for (len = 0; Serial.available() > 0; len++) {
+    //   buf[len] = Serial.read();
+    // }
+    // //验证尾
+    // if (buf[len - 1] != '}')
+    //   return;
+    // buf[len - 1] = 0;
 
     int mode = 0, x = 0, y = 0;
     sscanf(buf, "%d,%d,%d", &mode, &x, &y);
