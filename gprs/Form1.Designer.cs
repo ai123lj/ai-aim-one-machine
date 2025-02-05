@@ -54,8 +54,6 @@ namespace gprs
             open_btn = new System.Windows.Forms.Button();
             folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
             folderBrowserDialog2 = new System.Windows.Forms.FolderBrowserDialog();
-            button1 = new System.Windows.Forms.Button();
-            button2 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             groupBox1.SuspendLayout();
             groupBox2.SuspendLayout();
@@ -316,33 +314,11 @@ namespace gprs
             open_btn.UseVisualStyleBackColor = true;
             open_btn.Click += open_btn_Click;
             // 
-            // button1
-            // 
-            button1.Location = new System.Drawing.Point(610, 347);
-            button1.Name = "button1";
-            button1.Size = new System.Drawing.Size(75, 23);
-            button1.TabIndex = 13;
-            button1.Text = "button1";
-            button1.UseVisualStyleBackColor = true;
-            button1.Click += button1_Click;
-            // 
-            // button2
-            // 
-            button2.Location = new System.Drawing.Point(610, 381);
-            button2.Name = "button2";
-            button2.Size = new System.Drawing.Size(75, 23);
-            button2.TabIndex = 14;
-            button2.Text = "button2";
-            button2.UseVisualStyleBackColor = true;
-            button2.Click += button2_Click;
-            // 
             // Form1
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 17F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            ClientSize = new System.Drawing.Size(697, 416);
-            Controls.Add(button2);
-            Controls.Add(button1);
+            ClientSize = new System.Drawing.Size(612, 416);
             Controls.Add(groupBox4);
             Controls.Add(groupBox3);
             Controls.Add(groupBox2);
@@ -392,8 +368,6 @@ namespace gprs
         private System.Windows.Forms.RadioButton radioButton3;
         private System.Windows.Forms.RadioButton radioButton4;
         private System.Windows.Forms.RadioButton radioButton6;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Button button2;
     }
 }
 
