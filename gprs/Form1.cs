@@ -20,6 +20,7 @@ using Compunet.YoloSharp.Data;
 using System.Timers;
 using System.Net.Sockets;
 using System.Net;
+using static System.Windows.Forms.AxHost;
 namespace gprs
 {
     public partial class Form1 : Form
@@ -42,6 +43,8 @@ namespace gprs
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////键盘驱动
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         private static extern short GetAsyncKeyState(Keys key);
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern short GetKeyboardState(byte[] lpKeyState);
 
         [DllImport("user32.dll")]
         public static extern void keybd_event(byte bVk, byte bScan, int dwFlags, int dwExtraInfo);
@@ -73,6 +76,7 @@ namespace gprs
         Graphics graphics;
         Pen pen = new Pen(System.Drawing.Color.Yellow); // 点的大小设置为1像素
         Pen pen2 = new Pen(System.Drawing.Color.Green); // 点的大小设置为1像素
+        Pen pen3 = new Pen(System.Drawing.Color.Blue,5); // 点的大小设置为1像素
         System.Drawing.Point pointMirror = new System.Drawing.Point(width / 2 + 3, height / 2 + 3);
         /// </summary>
         public Form1()
@@ -187,11 +191,22 @@ namespace gprs
 
             Task.Run(() =>
             {
+                byte[] lpKeyState= new byte[256];
                 while (true)
                 {
                     Thread.Sleep(1);
+                    /*
+                    count++;
+                    
+                    var S =GetKeyboardState(lpKeyState);
 
-                    if (GetAsyncKeyState(Keys.D1) < 0)
+                    
+                    Action actionA = () =>
+                    {
+                        textBox1.Text = lpKeyState[(int)Keys.CapsLock] + ""+ S;
+                    };
+                    Invoke(actionA);
+                    if (lpKeyState[(int)Keys.D1] == 128)
                     {
                         Action action = () =>
                         {
@@ -207,7 +222,7 @@ namespace gprs
                         };
                         Invoke(action);
                     }
-                    else if (GetAsyncKeyState(Keys.D2) < 0)
+                    else if (lpKeyState[(int)Keys.D2] == 128)
                     {
                         Action action = () =>
                         {
@@ -219,7 +234,7 @@ namespace gprs
                         };
                         Invoke(action);
                     }
-                    else if ((GetAsyncKeyState(Keys.D3) < 0) || (GetAsyncKeyState(Keys.D4) < 0))
+                    else if ((lpKeyState[(int)Keys.D3] == 128) || (lpKeyState[(int)Keys.D4] == 128))
                     {
                         Action action = () =>
                         {
@@ -234,6 +249,55 @@ namespace gprs
                         };
                         Invoke(action);
                     }
+                    */
+                    for (int i = 0; i < 20; i++) 
+                    {
+                        //count++;
+                        if (GetAsyncKeyState(Keys.D1) < 0)
+                        {
+                            Action action = () =>
+                            {
+                                switch (fireZhu)
+                                {
+                                    case 1: radioButton11.Checked = true; break;
+                                    case 2: radioButton5.Checked = true; break;
+                                    case 3: radioButton4.Checked = true; break;
+                                    case 4: radioButton7.Checked = true; break;
+                                    case 5: radioButton8.Checked = true; break;
+                                    case 6: radioButton12.Checked = true; break;
+                                }
+                            };
+                            Invoke(action);
+                        }
+                        else if (GetAsyncKeyState(Keys.D2) < 0)
+                        {
+                            Action action = () =>
+                            {
+                                switch (fireFu)
+                                {
+                                    case 1: radioButton9.Checked = true; break;
+                                    case 2: radioButton6.Checked = true; break;
+                                }
+                            };
+                            Invoke(action);
+                        }
+                        else if ((GetAsyncKeyState(Keys.D3) < 0) || (GetAsyncKeyState(Keys.D4) < 0))
+                        {
+                            Action action = () =>
+                            {
+                                radioButton11.Checked = false;
+                                radioButton5.Checked = false;
+                                radioButton4.Checked = false;
+                                radioButton7.Checked = false;
+                                radioButton8.Checked = false;
+                                radioButton12.Checked = false;
+                                radioButton9.Checked = false;
+                                radioButton6.Checked = false;
+                            };
+                            Invoke(action);
+                        }
+                    }
+
                 }
             });
 
@@ -298,7 +362,7 @@ namespace gprs
 
             System.Drawing.Color ColorMirror = bitmap.GetPixel(pointMirror.X, pointMirror.Y);
             graphics.DrawLine(pen, pointMirror.X, pointMirror.Y, pointMirror.X, pointMirror.Y - 1);
-
+            
             if (serialPort1.IsOpen == false)
             {
                 return;
@@ -369,7 +433,7 @@ namespace gprs
             {
                 return;
             }
-            
+           
             //根据枪械选择不同的触发方式                  
             if (fireMode == 1)//狙击模式
             {
@@ -435,14 +499,16 @@ namespace gprs
             memoryStream.Position = 0; // 重设流的位置，以确保从头开始读取
             SixLabors.ImageSharp.Image img = SixLabors.ImageSharp.Image.Load(memoryStream);
             YoloResult<Pose> result = predictor.Pose(img);
-            //memoryStream.Position = 54; // 重设流的位置，以确保从头开始读取
-            //byte[] buffer = new byte[memoryStream.Length - 54];
-            //int bytesRead = memoryStream.Read(buffer, 0, (int)memoryStream.Length - 54);
+            /*
+            memoryStream.Position = 54; // 重设流的位置，以确保从头开始读取
+            byte[] buffer = new byte[memoryStream.Length - 54];
+            int bytesRead = memoryStream.Read(buffer, 0, (int)memoryStream.Length - 54);
+            */
             //把识别结果画到图像上，并寻找离准心最近的敌人
             int id = -1, min = 1000, id2 = 0;
             for (int i = 0; i < result.Count; i++)// foreach (var item in result)
             {
-                if (result[i].Confidence < 0.5)
+                if (result[i].Confidence < 0.5)//置信度低则跳过
                     continue;
 
 
@@ -466,7 +532,7 @@ namespace gprs
                 }
 
                 
-                for (int y_ = y_top; y_ < y_bott; y_++)
+                for (int y_ = y_top; y_ < y_bott; y_++)//找寻人物头上是否有队友图标，找色方案
                 {
                     for (int x_ = x_left; x_ < x_right; x_++)
                     {
@@ -478,29 +544,49 @@ namespace gprs
                             isTeammate = true;
                             x_ = 640;
                             y_ = 640;
+                            x_ = x_right;//退出循环
+                            y_ = y_bott;
                             //graphics.DrawEllipse(pen, x_, y_, 5, 5);
                         }
                     }
                 }
                 
-                if (isTeammate)
+                if (isTeammate)//识别为队友
                 {
                     graphics.DrawRectangle(pen2, result[i].Bounds.X, y_top, result[i].Bounds.Width, y_bott- y_top);
                     continue;
                 }
-                else
+                else//识别为敌人
                 {
                     graphics.DrawRectangle(pen, result[i].Bounds.X, result[i].Bounds.Y, result[i].Bounds.Width, result[i].Bounds.Height);
                 }
-                */
 
-                foreach (var po in result[i])
+                //绘制人体关键点之间的连线，形成类似火柴人的效果
+                graphics.DrawLine(pen3, result[i][11].Point.X, result[i][11].Point.Y, result[i][12].Point.X, result[i][12].Point.Y);//绘制左胯与右胯的连线
+                graphics.DrawLine(pen3, result[i][5].Point.X, result[i][5].Point.Y, result[i][6].Point.X, result[i][6].Point.Y); //
+                graphics.DrawLine(pen3, result[i][3].Point.X, result[i][3].Point.Y, result[i][4].Point.X, result[i][4].Point.Y); //
+                graphics.DrawLine(pen3, (result[i][3].Point.X+ result[i][4].Point.X)/2, (result[i][3].Point.Y + result[i][4].Point.Y) / 2, (result[i][5].Point.X + result[i][6].Point.X) / 2, (result[i][5].Point.Y + result[i][6].Point.Y) / 2); //
+
+                graphics.DrawLine(pen3, result[i][6].Point.X, result[i][6].Point.Y, result[i][8].Point.X, result[i][8].Point.Y); //
+                graphics.DrawLine(pen3, result[i][8].Point.X, result[i][8].Point.Y, result[i][10].Point.X, result[i][10].Point.Y); //
+                graphics.DrawLine(pen3, result[i][6].Point.X, result[i][6].Point.Y, result[i][12].Point.X, result[i][12].Point.Y); //
+                graphics.DrawLine(pen3, result[i][12].Point.X, result[i][12].Point.Y, result[i][14].Point.X, result[i][14].Point.Y); //
+                graphics.DrawLine(pen3, result[i][14].Point.X, result[i][14].Point.Y, result[i][16].Point.X, result[i][16].Point.Y); //
+
+                graphics.DrawLine(pen3, result[i][5].Point.X, result[i][5].Point.Y, result[i][7].Point.X, result[i][7].Point.Y); //
+                graphics.DrawLine(pen3, result[i][7].Point.X, result[i][7].Point.Y, result[i][9].Point.X, result[i][9].Point.Y); //
+                graphics.DrawLine(pen3, result[i][5].Point.X, result[i][5].Point.Y, result[i][11].Point.X, result[i][11].Point.Y); //
+                graphics.DrawLine(pen3, result[i][11].Point.X, result[i][11].Point.Y, result[i][13].Point.X, result[i][13].Point.Y); //
+                graphics.DrawLine(pen3, result[i][13].Point.X, result[i][13].Point.Y, result[i][15].Point.X, result[i][15].Point.Y); //
+
+
+                foreach (var po in result[i])//
                 {
-                    //graphics.DrawLine(pen, po.Point.X, po.Point.Y, po.Point.X, po.Point.Y - 1); // 绘制一条宽度为1的线，因为点是1x1的
-                    //graphics.DrawString("" + id2++, new System.Drawing.Font("Arial", 16), new SolidBrush(System.Drawing.Color.Black), po.Point.X, po.Point.Y);
+                    //graphics.DrawLine(pen, po.Point.X, po.Point.Y, po.Point.X, po.Point.Y - 1); // 绘制人体关键点
+                    //graphics.DrawString("" + id2++, new System.Drawing.Font("Arial", 16), new SolidBrush(System.Drawing.Color.Black), po.Point.X, po.Point.Y);//绘制人体关键点的编号
                 }
-                
-                if (Math.Abs(result[i][0].Point.X - width / 2) < min)
+                */
+                if (Math.Abs(result[i][0].Point.X - width / 2) < min)//选一个离中心最近的
                 {
                     min = Math.Abs(result[i][0].Point.X - width / 2);
                     id = i;
@@ -530,32 +616,117 @@ namespace gprs
             if (id < 0)
                 return;
             
-            //根据识别坐标，进行瞄准杀敌操作                   
 
+            // 根据识别坐标，进行瞄准杀敌操作
+            int targetX = 0;
+            int targetY = 0;
+
+            switch (location) // 根据指定射击位置，选择相应参数
+            {
+                case 0: // 额头
+                    targetX = result[id][0].Point.X;
+                    targetY = (result[id].Bounds.Y + result[id][1].Point.Y) / 2;
+                    break;
+                case 1: // 胸
+                    targetX = (result[id][5].Point.X + result[id][6].Point.X) / 2;
+                    targetY = (result[id][6].Point.Y * 2 + result[id][11].Point.Y) / 3;
+                    break;
+                case 2: // 鼻子
+                    targetX = result[id][1].Point.X;
+                    targetY = result[id][1].Point.Y;
+                    break;
+            }
+
+            // 确保目标坐标在有效范围内，防止打墙上
+            targetX = Math.Clamp(targetX, result[id].Bounds.X+5, result[id].Bounds.X + result[id].Bounds.Width -5);
+            targetY = Math.Clamp(targetY, result[id].Bounds.Y+5, result[id].Bounds.Y + result[id].Bounds.Height-5);
+
+
+            // 转换为鼠标的移动值
+            int mouseXMove = (targetX - width / 2) * xSensitivity / 100;
+            int mouseYMove = (targetY - height / 2) * ySensitivity / 100;
+
+            // 修正鼠标移动值的最小距离限制，鼠标有BUG，在单次移动距离小于2时，点击延时会很大，所以限制最小移动距离
+            if (Math.Abs(mouseYMove) < 2)
+            {
+                mouseYMove = Math.Sign(mouseYMove) * 2;
+            }
+
+            // 根据射击模式发送指令
+            if (fireMode == 1) // 狙击模式，打完自动切手枪
+            {
+                serialPort1.Write($"{{4,{mouseXMove},{mouseYMove}}}"); // 鼠标模式4，移动鼠标、开枪、切枪到副武器
+
+                jiaDianMode = false;
+                stopwatch.Reset();
+                Thread.Sleep(new Random().Next(120, 150));
+            }
+            else if (fireMode == 2) // 点射模式
+            {
+                serialPort1.Write($"{{1,{mouseXMove},{mouseYMove}}}"); // 鼠标模式1，移动鼠标、开枪
+                jiaDianMode = false;
+                stopwatch.Reset();
+                Thread.Sleep(new Random().Next(100, 140));
+            }
+            else if (fireMode == 3) // 连发模式，只移动准心
+            {
+                if (stopwatchJianGe.IsRunning & stopwatchJianGe.ElapsedMilliseconds < 100) // 隔100ms吸附1次
+                {
+                    stopwatchJianGe.Restart();
+                    serialPort1.Write($"{{0,{mouseXMove},{mouseYMove}}}"); // 鼠标模式0，移动鼠标不开枪
+                }
+                else if (!stopwatchJianGe.IsRunning)
+                {
+                    stopwatchJianGe.Restart();
+                    serialPort1.Write($"{{0,{mouseXMove},{mouseYMove}}}"); // 鼠标模式0，移动鼠标不开枪
+                }
+            }
+
+            // 绘制瞄准点和置信度
+            graphics.DrawEllipse(pen, targetX, targetY, 5, 5);
+            graphics.DrawString("" + result[id].Confidence, new System.Drawing.Font("Arial", 16), new SolidBrush(System.Drawing.Color.Black), 0, 0);
+
+            // 图像存档
+            string time1 = $"./img/{DateTime.Now.Ticks / 10000} {mouseXMove},{mouseYMove}.bmp";            
+            bitmap.Save(time1, ImageFormat.Bmp);
+
+            //根据识别坐标，进行瞄准杀敌操作                   
+            /*
+            Math.Clamp(targetX, result[id].Bounds.X, result[id].Bounds.X + result[id].Bounds.Width);
             int x = 0;
             int y = 0;
 
-            switch (location)
+            switch (location)//根据指定射击位置，选择相应参数
             {
-                case 0:
-                    x = result[id][0].Point.X - width / 2;
-                    y = (result[id].Bounds.Y + result[id][1].Point.Y) / 2 - height / 2;
+                case 0://额头
+                    x = result[id][0].Point.X;
+                    y = (result[id].Bounds.Y + result[id][1].Point.Y) / 2;
                     break;
-                case 1:
-                    x = (result[id][5].Point.X + result[id][6].Point.X) / 2 - width / 2;
-                    y = (result[id][6].Point.Y * 2 + result[id][11].Point.Y) / 3 - height / 2;
+                case 1://胸
+                    x = (result[id][5].Point.X + result[id][6].Point.X) / 2;
+                    y = (result[id][6].Point.Y * 2 + result[id][11].Point.Y) / 3;
                     break;
-                case 2:
-                    x = result[id][1].Point.X - width / 2;
-                    y = result[id][1].Point.Y - height / 2;
+                case 2://鼻子
+                    x = result[id][1].Point.X;
+                    y = result[id][1].Point.Y;
                     break;
             }
-            graphics.DrawEllipse(pen, x + width / 2, y + height / 2,5,5);
+            if (x > result[id].Bounds.X + result[id].Bounds.Width)
+                x = result[id].Bounds.X + result[id].Bounds.Width;
+            if (x < result[id].Bounds.X)
+                x = result[id].Bounds.X;
+            if (y > result[id].Bounds.Y + result[id].Bounds.Height)
+                y = result[id].Bounds.Y + result[id].Bounds.Height;
+            if (y < result[id].Bounds.Y)
+                y = result[id].Bounds.Y;
+
+            graphics.DrawEllipse(pen, x, y,5,5);
             graphics.DrawString("" + result[id].Confidence, new System.Drawing.Font("Arial", 16), new SolidBrush(System.Drawing.Color.Black), 0, 0);
 
-            int x1 = (int)(x * xSensitivity / 100.0f);
-            int y1 = (int)(y * ySensitivity / 100.0f);
-            if (0 <= y1 && y1 <= 1)
+            int x1 = (x- width / 2) * xSensitivity / 100;//转换为鼠标的X移动值
+            int y1 = (y- height / 2) * ySensitivity / 100;//转换为鼠标的Y移动值
+
+            if (0 <= y1 && y1 <= 1)//鼠标有BUG，在单次移动距离小于2时，点击延时会很大，所以限制最小移动距离
             {
                 y1 = 2;
             }
@@ -565,7 +736,7 @@ namespace gprs
             }
             if (fireMode == 1)//狙击模式，打完自动切手枪
             {
-                serialPort1.Write("{4," + x1 + "," + y1 + "}");
+                serialPort1.Write("{4," + x1 + "," + y1 + "}");//鼠标模式4，移动鼠标、开枪、切枪到副武器
                 string time1 = "./img/" + DateTime.Now.Ticks / 10000 + " " + x1 + "," + y1 + ".bmp";
                 //记录未操作前的图像                               
                 bitmap.Save(time1, ImageFormat.Bmp);
@@ -577,7 +748,7 @@ namespace gprs
             }
             else if (fireMode == 2)//点射模式
             {
-                serialPort1.Write("{1," + x1 + "," + y1 + "}");
+                serialPort1.Write("{1," + x1 + "," + y1 + "}");//鼠标模式1，移动鼠标、开枪
 
                 string time1 = "./img/" + DateTime.Now.Ticks / 10000 + " " + x1 + "," + y1 + ".bmp";
                 //记录未操作前的图像                               
@@ -585,7 +756,7 @@ namespace gprs
                 jiaDianMode = false;
                 stopwatch.Reset();
 
-                int time = new Random().Next(70, 110);
+                int time = new Random().Next(100, 140);
                 Thread.Sleep(time);
             }
             else if (fireMode == 3)//连发模式，只移动准心
@@ -595,7 +766,7 @@ namespace gprs
                     if (stopwatchJianGe.ElapsedMilliseconds > 100)//隔100ms吸附1次
                     {
                         stopwatchJianGe.Restart();
-                        serialPort1.Write("{0," + x1 + "," + y1 + "}");
+                        serialPort1.Write("{0," + x1 + "," + y1 + "}");//鼠标模式0，移动鼠标不开枪
                     }
                 }
                 else
@@ -608,6 +779,7 @@ namespace gprs
                     stopwatchJianGe.Restart();
                 }
             }
+            */
         }
         public bool IsTeammate(MemoryStream memoryStream,SixLabors.ImageSharp.Rectangle Bounds, int x,int y,int width,int height)
         {
